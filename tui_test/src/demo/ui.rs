@@ -1,4 +1,5 @@
 use crate::demo::App;
+#[allow(unused_imports)]
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
@@ -50,7 +51,7 @@ where
         )
         .split(area);
     draw_welcome(f, app, chunks[0]);
-    draw_charts(f, app, chunks[1]);
+    draw_music_list(f, app, chunks[1]);
     draw_music_gauge(f, app, chunks[2]);
 }
 
@@ -98,7 +99,7 @@ where
     f.render_widget(sparkline, chunks[1]);
 }
 
-fn draw_charts<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
+fn draw_music_list<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
 where
     B: Backend,
 {
@@ -117,52 +118,44 @@ where
             .split(chunks[0]);
         {
             let chunks = Layout::default()
-                .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+                .constraints([Constraint::Percentage(100)].as_ref())
                 .direction(Direction::Horizontal)
                 .split(chunks[0]);
 
-            // Draw tasks
+            // Draw Music List
+            // let tasks: Vec<ListItem> = app
+            //     .tasks
+            //     .items
+            //     .iter()
+            //     .map(|i| ListItem::new(vec![Spans::from(Span::raw(*i))]))
+            //     .collect();
             let tasks: Vec<ListItem> = app
-                .tasks
+                .music_list
                 .items
                 .iter()
-                .map(|i| ListItem::new(vec![Spans::from(Span::raw(*i))]))
+                .map(|i| ListItem::new(vec![Spans::from(Span::raw(i))]))
                 .collect();
+
             let tasks = List::new(tasks)
-                .block(Block::default().borders(Borders::ALL).title("List"))
+                .block(Block::default().borders(Borders::ALL).title(Span::styled(
+                    "Music List",
+                    Style::default()
+                        .fg(Color::LightCyan)
+                        .add_modifier(Modifier::BOLD),
+                )))
                 .highlight_style(Style::default().add_modifier(Modifier::BOLD))
                 .highlight_symbol("> ");
-            f.render_stateful_widget(tasks, chunks[0], &mut app.tasks.state);
-
-            // Draw logs
-            let info_style = Style::default().fg(Color::Blue);
-            let warning_style = Style::default().fg(Color::Yellow);
-            let error_style = Style::default().fg(Color::Magenta);
-            let critical_style = Style::default().fg(Color::Red);
-            let logs: Vec<ListItem> = app
-                .logs
-                .items
-                .iter()
-                .map(|&(evt, level)| {
-                    let s = match level {
-                        "ERROR" => error_style,
-                        "CRITICAL" => critical_style,
-                        "WARNING" => warning_style,
-                        _ => info_style,
-                    };
-                    let content = vec![Spans::from(vec![
-                        Span::styled(format!("{:<9}", level), s),
-                        Span::raw(evt),
-                    ])];
-                    ListItem::new(content)
-                })
-                .collect();
-            let logs = List::new(logs).block(Block::default().borders(Borders::ALL).title("List"));
-            f.render_stateful_widget(logs, chunks[1], &mut app.logs.state);
+            f.render_stateful_widget(tasks, chunks[0], &mut app.music_list.state);
         }
 
+        // Draw Music Waves
         let barchart = BarChart::default()
-            .block(Block::default().borders(Borders::ALL).title("Bar chart"))
+            .block(Block::default().borders(Borders::ALL).title(Span::styled(
+                "Music Waves",
+                Style::default()
+                    .fg(Color::LightRed)
+                    .add_modifier(Modifier::BOLD),
+            )))
             .data(&app.barchart)
             .bar_width(3)
             .bar_gap(2)
@@ -174,11 +167,11 @@ where
             .value_style(
                 Style::default()
                     .fg(Color::Black)
-                    .bg(Color::Green)
+                    .bg(Color::Blue)
                     .add_modifier(Modifier::ITALIC),
             )
-            .label_style(Style::default().fg(Color::Yellow))
-            .bar_style(Style::default().fg(Color::Green));
+            .label_style(Style::default().fg(Color::Red))
+            .bar_style(Style::default().fg(Color::Blue));
         f.render_widget(barchart, chunks[1]);
     }
     if app.show_chart {
@@ -198,12 +191,12 @@ where
         ];
         let datasets = vec![
             Dataset::default()
-                .name("data2")
+                .name("high pitch")
                 .marker(symbols::Marker::Dot)
                 .style(Style::default().fg(Color::Cyan))
                 .data(&app.signals.sin1.points),
             Dataset::default()
-                .name("data3")
+                .name("low pitch")
                 .marker(if app.enhanced_graphics {
                     symbols::Marker::Braille
                 } else {
@@ -216,7 +209,7 @@ where
             .block(
                 Block::default()
                     .title(Span::styled(
-                        "Chart",
+                        "Music Status",
                         Style::default()
                             .fg(Color::Cyan)
                             .add_modifier(Modifier::BOLD),
@@ -225,14 +218,14 @@ where
             )
             .x_axis(
                 Axis::default()
-                    .title("X Axis")
+                    .title("Time")
                     .style(Style::default().fg(Color::Gray))
                     .bounds(app.signals.window)
                     .labels(x_labels),
             )
             .y_axis(
                 Axis::default()
-                    .title("Y Axis")
+                    .title("Pitch")
                     .style(Style::default().fg(Color::Gray))
                     .bounds([-20.0, 20.0])
                     .labels(vec![
@@ -248,9 +241,13 @@ where
 fn draw_music_gauge<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
 where
     B: Backend,
-{
+{   
+    let current_music = match app.cur_music {
+        Some(music_index) => {app.music_list.items[music_index].as_str()},
+        None => "No Music",
+    };
     let line_gauge = LineGauge::default()
-    .block(Block::default().title("Music Name"))
+    .block(Block::default().title(current_music))
     .gauge_style(Style::default().fg(Color::LightBlue))
     .line_set(if app.enhanced_graphics {
         symbols::line::THICK

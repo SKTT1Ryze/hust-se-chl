@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = App::new("Termion demo", cli.enhanced_graphics);
+    let mut app = App::new("Termion demo", cli.enhanced_graphics, "Music");
     loop {
         terminal.draw(|f| ui::draw(f, &mut app))?;
 

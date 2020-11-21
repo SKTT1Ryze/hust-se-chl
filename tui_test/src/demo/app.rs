@@ -1,4 +1,6 @@
 use crate::util::{RandomSignal, SinSignal, StatefulList, TabsState};
+use std::vec::Vec;
+use walkdir::WalkDir;
 
 const TASKS: [&str; 24] = [
     "Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7", "Item8", "Item9", "Item10",
@@ -95,14 +97,12 @@ impl Signals {
         self.window[1] += 1.0;
     }
 }
-
 pub struct Server<'a> {
     pub name: &'a str,
     pub location: &'a str,
     pub coords: (f64, f64),
     pub status: &'a str,
 }
-
 pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
@@ -116,20 +116,30 @@ pub struct App<'a> {
     pub barchart: Vec<(&'a str, u64)>,
     pub servers: Vec<Server<'a>>,
     pub enhanced_graphics: bool,
+    pub music_list: StatefulList<String>,
+    pub cur_music: Option<usize>,
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &'a str, enhanced_graphics: bool) -> App<'a> {
+    pub fn new(title: &'a str, enhanced_graphics: bool, music_list_path: &'a str) -> App<'a> {
         let mut rand_signal = RandomSignal::new(0, 100);
         let sparkline_points = rand_signal.by_ref().take(300).collect();
         let mut sin_signal = SinSignal::new(0.2, 3.0, 18.0);
         let sin1_points = sin_signal.by_ref().take(100).collect();
         let mut sin_signal2 = SinSignal::new(0.1, 2.0, 10.0);
         let sin2_points = sin_signal2.by_ref().take(200).collect();
+        let mut music_list = Vec::new();
+        for entry in WalkDir::new(music_list_path) {
+            let entry = entry.unwrap();
+            let path = String::from(entry.path().to_str().unwrap());
+            if path.len() > music_list_path.len() {
+                music_list.push(path);
+            }
+        }
         App {
             title,
             should_quit: false,
-            tabs: TabsState::new(vec!["home", "Piano"]),
+            tabs: TabsState::new(vec!["Music", "Piano"]),
             show_chart: true,
             progress: 0.0,
             sparkline: Signal {
@@ -180,15 +190,17 @@ impl<'a> App<'a> {
                 },
             ],
             enhanced_graphics,
+            music_list: StatefulList::with_items(music_list),
+            cur_music: None,
         }
     }
 
     pub fn on_up(&mut self) {
-        self.tasks.previous();
+        self.music_list.previous();
     }
 
     pub fn on_down(&mut self) {
-        self.tasks.next();
+        self.music_list.next();
     }
 
     pub fn on_right(&mut self) {
@@ -206,6 +218,9 @@ impl<'a> App<'a> {
             }
             't' => {
                 self.show_chart = !self.show_chart;
+            }
+            '\n' => {
+                self.cur_music = self.music_list.state.selected();
             }
             _ => {}
         }
