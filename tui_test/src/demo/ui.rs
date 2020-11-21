@@ -6,7 +6,7 @@ use tui::{
     style::{Color, Modifier, Style},
     symbols,
     text::{Span, Spans},
-    widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle},
+    widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle, Points},
     widgets::{
         Axis, BarChart, Block, Borders, Chart, Dataset, Gauge, LineGauge, List, ListItem,
         Paragraph, Row, Sparkline, Table, Tabs, Wrap,
@@ -225,33 +225,71 @@ where
             );
         f.render_widget(chart, chunks[1]);
     } else {
-        let logo = Canvas::default()
-            .block(Block::default().title("Logo").borders(Borders::ALL))
-            .paint(|ctx| {
-                ctx.draw(&Map {
-                    resolution: MapResolution::High,
-                    color: Color::White
-                });
-                ctx.layer();
-                ctx.draw(&Line {
-                    x1: 0.0,
-                    y1: 10.0,
-                    x2: 10.0,
-                    y2: 10.0,
-                    color: Color::White,
-                });
-                ctx.draw(&Rectangle {
-                    x: 10.0,
-                    y: 20.0,
-                    width: 10.0,
-                    height: 10.0,
-                    color: Color::Red
-                });
-            })
-            .x_bounds([-180.0, 180.0])
-            .y_bounds([-90.0, 90.0]);
-            f.render_widget(logo, chunks[1]);
-        }
+        // Draw logo
+        // _  .-')                  .-')     .-') _    
+        // ( \( -O )                ( OO ).  (  OO) )   
+        // ,------.   ,--. ,--.   (_)---\_) /     '._  
+        // |   /`. '  |  | |  |   /    _ |  |'--...__) 
+        // |  /  | |  |  | | .-') \  :` `.  '--.  .--' 
+        // |  |_.' |  |  |_|( OO ) '..`''.)    |  |    
+        // |  .  '.'  |  | | `-' /.-._)   \    |  |    
+        // |  |\  \  ('  '-'(_.-' \       /    |  |    
+        // `--' '--'   `-----'     `-----'     `--'
+        
+        // PPPPPPPPPPPPPPPPP     iiii                                                       
+        // P::::::::::::::::P   i::::i                                                      
+        // P::::::PPPPPP:::::P   iiii                                                       
+        // PP:::::P     P:::::P                                                             
+        // P::::P     P:::::Piiiiiii   aaaaaaaaaaaaa   nnnn  nnnnnnnn       ooooooooooo   
+        // P::::P     P:::::Pi:::::i   a::::::::::::a  n:::nn::::::::nn   oo:::::::::::oo 
+        // P::::PPPPPP:::::P  i::::i   aaaaaaaaa:::::a n::::::::::::::nn o:::::::::::::::o
+        // P:::::::::::::PP   i::::i            a::::a nn:::::::::::::::no:::::ooooo:::::o
+        // P::::PPPPPPPPP     i::::i     aaaaaaa:::::a   n:::::nnnn:::::no::::o     o::::o
+        // P::::P             i::::i   aa::::::::::::a   n::::n    n::::no::::o     o::::o
+        // P::::P             i::::i  a::::aaaa::::::a   n::::n    n::::no::::o     o::::o
+        // P::::P             i::::i a::::a    a:::::a   n::::n    n::::no::::o     o::::o
+        // PP::::::PP         i::::::ia::::a    a:::::a   n::::n    n::::no:::::ooooo:::::o
+        // P::::::::P         i::::::ia:::::aaaa::::::a   n::::n    n::::no:::::::::::::::o
+        // P::::::::P         i::::::i a::::::::::aa:::a  n::::n    n::::n oo:::::::::::oo 
+        // PPPPPPPPPP         iiiiiiii  aaaaaaaaaa  aaaa  nnnnnn    nnnnnn   ooooooooooo   
+                                                                                                                                                            
+        let logo = vec![
+            Spans::from("_  .-')                  .-')     .-') _    "),
+            Spans::from("( \\( -O )                ( OO ).  (  OO) )   "),
+            Spans::from(",------.   ,--. ,--.   (_)---\\_) /     '._  "),
+            Spans::from("|   /`. '  |  | |  |   /    _ |  |'--...__) "),
+            Spans::from("|  /  | |  |  | | .-') \\  :` `.  '--.  .--' "),
+            Spans::from("|  |_.' |  |  |_|( OO ) '..`''.)    |  |    "),
+            Spans::from("|  .  '.'  |  | | `-' /.-._)   \\    |  |    "),
+            Spans::from("|  |\\  \\  ('  '-'(_.-' \\       /    |  |    "),
+            Spans::from("`--' '--'   `-----'     `-----'     `--'    "),
+            Spans::from(""),
+            Spans::from("PPPPPPPPPPPPPPPPP     iiii"),
+            Spans::from("P::::::::::::::::P   i::::i"),
+            Spans::from("P::::::PPPPPP:::::P   iiii"),
+            Spans::from("PP:::::P     P:::::P"),
+            Spans::from("P::::P     P:::::P   iiiiiii    aaaaaaaaaaaaa   nnnn  nnnnnnnn        ooooooooooo"),
+            Spans::from("P::::P     P:::::P   i:::::i    a::::::::::::a  n:::nn::::::::nn    oo:::::::::::oo"),
+            Spans::from("P::::PPPPPP:::::P     i::::i    aaaaaaaaa:::::a n::::::::::::::nn  o:::::::::::::::o"),
+            Spans::from("P:::::::::::::PP      i::::i             a::::a nn:::::::::::::::n o:::::ooooo:::::o"),
+            Spans::from("P::::PPPPPPPPP        i::::i      aaaaaaa:::::a   n:::::nnnn:::::n o::::o     o::::o"),
+            Spans::from("P::::P                i::::i    aa::::::::::::a   n::::n    n::::n o::::o     o::::o"),
+            Spans::from("P::::P                i::::i   a::::aaaa::::::a   n::::n    n::::n o::::o     o::::o"),
+            Spans::from("P::::P                i::::i  a::::a    a:::::a   n::::n    n::::n o::::o     o::::o"),
+            Spans::from("PP::::::PP           i::::::i a::::a    a:::::a   n::::n    n::::n o:::::ooooo:::::o"),
+            Spans::from("P::::::::P           i::::::i a:::::aaaa::::::a   n::::n    n::::n o:::::::::::::::o"),
+            Spans::from("P::::::::P           i::::::i  a::::::::::aa:::a  n::::n    n::::n  oo:::::::::::oo"),
+            Spans::from("PPPPPPPPPP           iiiiiiii   aaaaaaaaaa  aaaa  nnnnnn    nnnnnn    ooooooooooo"),
+        ];
+        let block = Block::default().borders(Borders::ALL).title(Span::styled(
+            "Logo",
+            Style::default()
+                .fg(Color::Magenta)
+                .add_modifier(Modifier::BOLD),
+        ));
+        let logo = Paragraph::new(logo).block(block).wrap(Wrap { trim: true });
+        f.render_widget(logo, chunks[1]);
+    }
 }
 
 fn draw_music_gauge<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
