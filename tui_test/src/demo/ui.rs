@@ -102,12 +102,8 @@ where
 fn draw_music_list<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
 where
     B: Backend,
-{
-    let constraints = if app.show_chart {
-        vec![Constraint::Percentage(50), Constraint::Percentage(50)]
-    } else {
-        vec![Constraint::Percentage(100)]
-    };
+{    
+    let constraints = vec![Constraint::Percentage(50), Constraint::Percentage(50)]; 
     let chunks = Layout::default()
         .constraints(constraints)
         .direction(Direction::Horizontal)
@@ -122,13 +118,6 @@ where
                 .direction(Direction::Horizontal)
                 .split(chunks[0]);
 
-            // Draw Music List
-            // let tasks: Vec<ListItem> = app
-            //     .tasks
-            //     .items
-            //     .iter()
-            //     .map(|i| ListItem::new(vec![Spans::from(Span::raw(*i))]))
-            //     .collect();
             let tasks: Vec<ListItem> = app
                 .music_list
                 .items
@@ -235,7 +224,34 @@ where
                     ]),
             );
         f.render_widget(chart, chunks[1]);
-    }
+    } else {
+        let logo = Canvas::default()
+            .block(Block::default().title("Logo").borders(Borders::ALL))
+            .paint(|ctx| {
+                ctx.draw(&Map {
+                    resolution: MapResolution::High,
+                    color: Color::White
+                });
+                ctx.layer();
+                ctx.draw(&Line {
+                    x1: 0.0,
+                    y1: 10.0,
+                    x2: 10.0,
+                    y2: 10.0,
+                    color: Color::White,
+                });
+                ctx.draw(&Rectangle {
+                    x: 10.0,
+                    y: 20.0,
+                    width: 10.0,
+                    height: 10.0,
+                    color: Color::Red
+                });
+            })
+            .x_bounds([-180.0, 180.0])
+            .y_bounds([-90.0, 90.0]);
+            f.render_widget(logo, chunks[1]);
+        }
 }
 
 fn draw_music_gauge<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
