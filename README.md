@@ -28,5 +28,9 @@ Rust 语言实现的命令行虚拟钢琴: https://github.com/SKTT1Ryze/rust-pia
 ## 安装与使用
 该项目目前已经在`github`上开源，请移步这里[rust-piano](https://github.com/SKTT1Ryze/rust-piano)  
 
+## Demo 演示
+<img src = "./img/run_0.png" width = "70%">  
+<img src = "./img/run_1.png" width = "70%">  
+
 ## 开源协议
 [MIT 开源协议](./LICENSE)
