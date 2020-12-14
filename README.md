@@ -5,8 +5,8 @@
 + hkx（项目开发者）
 + ljw（项目开发者）
 
-## rust-piano
-Rust 语言实现的命令行虚拟钢琴  
+## [rust-piano](https://github.com/SKTT1Ryze/rust-piano)
+Rust 语言实现的命令行虚拟钢琴: https://github.com/SKTT1Ryze/rust-piano  
 ```
 
  _  .-')                  .-')     .-') _                 _ (`-.               ('-.          .-') _               
